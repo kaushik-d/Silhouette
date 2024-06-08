@@ -2,6 +2,8 @@
 #include <filesystem>
 
 #include "STLReader.h"
+#include "FindVisible.h"
+#include "PolygonToVTK.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,10 +33,53 @@ int main(int argc, char *argv[])
     std::cout << "Reading file takes " << duration.count() / 1e6 << " milliseconds." << std::endl;
     total_time += duration.count() / 1e6;
 
+    start = Clock::now();
     STL::check_normals(triangle_list);
 
     duration = Clock::now() - start;
     std::cout << "Checking normals takes " << duration.count() / 1e6 << " milliseconds." << std::endl;
+    total_time += duration.count() / 1e6;
+
+    start = Clock::now();
+
+    const Eigen::Vector3d shadow_plane_normal(0, 0, 1);
+    auto visible_triangles = FindVisible::get_visible_list(triangle_list, shadow_plane_normal);
+
+    std::cout << "Among " << triangle_list.size() << " triangles " << visible_triangles.size() << " are visible." << std::endl;
+
+    STL::writeBinary("./visiable.stl", visible_triangles);
+
+    duration = Clock::now() - start;
+    std::cout << "Getting visible list takes " << duration.count() / 1e6 << " milliseconds." << std::endl;
+    total_time += duration.count() / 1e6;
+
+    start = Clock::now();
+
+    const Eigen::Vector3d shadow_plane_origin(0, 0, 0);
+    FindVisible::project_tringles(visible_triangles, shadow_plane_normal, shadow_plane_origin);
+
+    STL::writeBinary("./projected.stl", visible_triangles);
+
+    duration = Clock::now() - start;
+    std::cout << "Projecting triangles takes " << duration.count() / 1e6 << " milliseconds." << std::endl;
+    total_time += duration.count() / 1e6;
+
+    start = Clock::now();
+
+    auto shadow_polygon = FindVisible::get_shadow(visible_triangles, shadow_plane_normal, shadow_plane_origin);
+
+    std::cout << "Shadow has an " << shadow_polygon.size() << " polygons. " << std::endl;
+
+    duration = Clock::now() - start;
+    std::cout << "Getting shadow " << duration.count() / 1e6 << " milliseconds." << std::endl;
+    total_time += duration.count() / 1e6;
+
+    start = Clock::now();
+
+    vtk_utils::export_polygon(shadow_polygon);
+
+    duration = Clock::now() - start;
+    std::cout << "Exporting shadow " << duration.count() / 1e6 << " milliseconds." << std::endl;
     total_time += duration.count() / 1e6;
 
     return 0;
