@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Triangle.h"
 
 void STL::Triangle::project(const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
@@ -41,7 +42,24 @@ polygon_t STL::Triangle::toPolygon2D(const BasisTransformation &transformation) 
     bg::append(poly.outer(), point_t(vert1[0], vert1[1]));
     bg::append(poly.outer(), point_t(vert3[0], vert3[1]));
 
-    bg::correct(poly);
+    double area = bg::area(poly);
 
+    if(area < 0.0)
+    {
+        polygon_t poly1;
+        bg::append(poly1.outer(), point_t(vert1[0], vert1[1]));
+        bg::append(poly1.outer(), point_t(vert2[0], vert2[1]));
+        bg::append(poly1.outer(), point_t(vert3[0], vert3[1]));
+        bg::append(poly1.outer(), point_t(vert1[0], vert1[1]));
+
+        double area1 = bg::area(poly1);
+
+        std::cout << "Area corrected " << area << " -> " << area1 << std::endl;
+
+        //bg::correct(poly1);
+        return poly1;
+    }
+
+    //bg::correct(poly);
     return poly;
 }

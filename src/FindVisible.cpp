@@ -24,23 +24,29 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles, 
 
     BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
 
-    auto triangle = triangles[0];
+    auto& triangle = triangles[0];
     // triangle.project(shadow_plane_normal, shadow_plane_origin);
-    polygon_t shadow1 = triangle.toPolygon2D(transformation);
+    //polygon_t shadow1 = triangle.toPolygon2D(transformation);
 
     mpolygon_t shadow;
-    shadow.push_back(shadow1);
+    //shadow.push_back(shadow1);
 
-    for (int i = 1; i < triangles.size(); i++)
+    for (int i = 0; i < triangles.size(); i++)
     {
-        auto triangle = triangles[i];
-        // triangle.project(shadow_plane_normal, shadow_plane_origin);
+        auto& triangle = triangles[i];
 
         mpolygon_t union_poly;
         polygon_t tri_poly = triangle.toPolygon2D(transformation);
 
 
-        if (bg::area(tri_poly) < 0.00001)
+        //if (bg::area(tri_poly) < 0.00001)
+        //{
+        //    continue;
+        //}
+
+        bool check_covered = bg::covered_by(tri_poly, shadow);
+
+        if(check_covered)
         {
             continue;
         }
