@@ -3,11 +3,14 @@
 
 void STL::Triangle::project(const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
 {
-    normal = shadow_plane_normal;
+    //normal = shadow_plane_normal;
 
     for (auto &vertex : vertex_list)
     {
-
+        Eigen::Vector3d v = vertex - shadow_plane_origin;
+        double dist = v.dot(shadow_plane_normal);
+        vertex = vertex - dist * shadow_plane_normal;
+        /*
         auto a = normal[0];
         auto b = normal[1];
         auto c = normal[2];
@@ -25,6 +28,16 @@ void STL::Triangle::project(const Eigen::Vector3d &shadow_plane_normal, const Ei
         vertex[0] = vertex[0] + t * a;
         vertex[1] = vertex[1] + t * b;
         vertex[2] = vertex[2] + t * c;
+        */
+    }
+}
+
+void STL::Triangle::transform(const BasisTransformation &transformation)
+{
+    for (auto &vertex : vertex_list)
+    {
+        auto vert1 = transformation.transform(vertex);
+        vertex = vert1;
     }
 }
 

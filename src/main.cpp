@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 
         shadow_plane_normal = Eigen::Vector3d(cmd.getDouble("nx"),cmd.getDouble("ny"),cmd.getDouble("nz"));
         shadow_plane_origin = Eigen::Vector3d(cmd.getDouble("ox"),cmd.getDouble("oy"),cmd.getDouble("oz"));
+
+        shadow_plane_normal.normalize();
 		
 	}
 	catch (...) {

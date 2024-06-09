@@ -70,8 +70,11 @@ void FindVisible::project_tringles(std::vector<STL::Triangle> &triangles, const 
     //auto triangle = triangles[0];
     //triangle.project(shadow_plane_normal, shadow_plane_origin);
 
+    //BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
+
     for (auto &triangle : triangles)
     {
         triangle.project(shadow_plane_normal, shadow_plane_origin);
+        //triangle.project(transformation);
     }
 }
