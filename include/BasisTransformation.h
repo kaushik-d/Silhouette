@@ -13,6 +13,7 @@ public:
 private:
     Eigen::Matrix3d m_BasisForm{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
     Eigen::Matrix3d m_Transformation; //{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+    Eigen::Matrix3d m_Transformation_inv;
     Eigen::Matrix3d m_BasisTo; //{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
     Eigen::Vector3d m_Origin; //{0, 0, 0};
 };

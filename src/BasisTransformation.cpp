@@ -75,20 +75,19 @@ BasisTransformation::BasisTransformation(const Eigen::Vector3d &twoD_plane_norma
                  new_z[0], new_z[1], new_z[2];
     m_BasisTo.transposeInPlace();
 
-    //m_Origin = twoD_plane_origin;
-    m_Origin = Eigen::Vector3d(0, 0, 0);
+    m_Origin = twoD_plane_origin;
+    //m_Origin = Eigen::Vector3d(0, 0, 0);
 
     m_Transformation = m_BasisTo;// * m_BasisForm.inverse();
+    m_Transformation_inv = m_Transformation.inverse(); //computeInverseAndDetWithCheck();
 }
 
 Eigen::Vector3d BasisTransformation::transform(const Eigen::Vector3d &vector) const
 {
-    Eigen::Vector3d new_vector = vector - m_Origin;
-    return m_Transformation * new_vector;
+    return m_Transformation * (vector - m_Origin);
 }
 
 Eigen::Vector3d BasisTransformation::reverse_transform(const Eigen::Vector3d &vector) const
 {
-    Eigen::Vector3d new_vector = m_Transformation.inverse() * vector;
-    return new_vector + m_Origin;
+    return m_Transformation_inv * vector+ m_Origin;
 }
