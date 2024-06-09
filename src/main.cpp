@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 
         shadow_plane_normal = Eigen::Vector3d(cmd.getDouble("nx"),cmd.getDouble("ny"),cmd.getDouble("nz"));
         shadow_plane_origin = Eigen::Vector3d(cmd.getDouble("ox"),cmd.getDouble("oy"),cmd.getDouble("oz"));
+
+        shadow_plane_normal.normalize();
 		
 	}
 	catch (...) {
@@ -81,7 +83,8 @@ int main(int argc, char *argv[])
 
     start = Clock::now();
 
-    auto shadow_polygon = FindVisible::get_shadow(visible_triangles, shadow_plane_normal, shadow_plane_origin);
+    double z_save;
+    auto shadow_polygon = FindVisible::get_shadow(visible_triangles, shadow_plane_normal, shadow_plane_origin, z_save);
 
     std::cout << "Shadow has an " << shadow_polygon.size() << " polygons. " << std::endl;
 
@@ -91,7 +94,7 @@ int main(int argc, char *argv[])
 
     start = Clock::now();
 
-    vtk_utils::export_polygon(shadow_polygon, shadow_plane_normal, shadow_plane_origin);
+    vtk_utils::export_polygon(shadow_polygon, shadow_plane_normal, shadow_plane_origin, "shadow.vtu", z_save);
 
     duration = Clock::now() - start;
     std::cout << "Exporting shadow " << duration.count() / 1e6 << " milliseconds." << std::endl;

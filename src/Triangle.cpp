@@ -3,7 +3,7 @@
 
 void STL::Triangle::project(const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
 {
-    normal = shadow_plane_normal;
+    Eigen::Vector3d normal = shadow_plane_normal;
 
     for (auto &vertex : vertex_list)
     {
@@ -28,7 +28,7 @@ void STL::Triangle::project(const Eigen::Vector3d &shadow_plane_normal, const Ei
     }
 }
 
-polygon_t STL::Triangle::toPolygon2D(const BasisTransformation &transformation) const
+polygon_t STL::Triangle::toPolygon2D(const BasisTransformation &transformation, double& z_save) const
 {
     // only valid after projection
 
@@ -41,6 +41,8 @@ polygon_t STL::Triangle::toPolygon2D(const BasisTransformation &transformation) 
     bg::append(poly.outer(), point_t(vert2[0], vert2[1]));
     bg::append(poly.outer(), point_t(vert1[0], vert1[1]));
     bg::append(poly.outer(), point_t(vert3[0], vert3[1]));
+
+    z_save = vert3[2];
 
     double area = bg::area(poly);
 

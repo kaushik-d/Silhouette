@@ -1,6 +1,9 @@
 #include "PolygonToVTK.h"
 
-void vtk_utils::export_polygon(const mpolygon_t &multi_polygon, const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin, const std::filesystem::path &finame_name)
+void vtk_utils::export_polygon(const mpolygon_t &multi_polygon, 
+    const Eigen::Vector3d &shadow_plane_normal, 
+    const Eigen::Vector3d &shadow_plane_origin, const std::filesystem::path &finame_name,
+    double z_save)
 {
     std::vector<double> points_for_vtu;
     std::vector<double> contour_id; // 1 is part, 0 and negatives are for thermal regions
@@ -26,19 +29,18 @@ void vtk_utils::export_polygon(const mpolygon_t &multi_polygon, const Eigen::Vec
 
         for (const auto pt : polygon.outer())
         {
-
-            Eigen::Vector3d point(pt.get<0>(), pt.get<1>(), 0);
+            
+            Eigen::Vector3d point(pt.get<0>(), pt.get<1>(), z_save);
             Eigen::Vector3d point_transform = transformation.reverse_transform(point);
 
             points_for_vtu.push_back(point_transform[0]);
             points_for_vtu.push_back(point_transform[1]);
             points_for_vtu.push_back(point_transform[2]);
+            
 
-            /*
-            points_for_vtu.push_back(pt.get<0>());
-            points_for_vtu.push_back(pt.get<1>());
-            points_for_vtu.push_back(0);
-            */
+            //points_for_vtu.push_back(pt.get<0>());
+            //points_for_vtu.push_back(pt.get<1>());
+            //points_for_vtu.push_back(0);
 
             connectivity.push_back(node_count);
             node_count++;
@@ -51,12 +53,17 @@ void vtk_utils::export_polygon(const mpolygon_t &multi_polygon, const Eigen::Vec
         {
             for (const auto pt : polygon_inner)
             {
-                Eigen::Vector3d point(pt.get<0>(), pt.get<1>(), 0);
+                
+                Eigen::Vector3d point(pt.get<0>(), pt.get<1>(), z_save);
                 Eigen::Vector3d point_transform = transformation.reverse_transform(point);
 
                 points_for_vtu.push_back(point_transform[0]);
                 points_for_vtu.push_back(point_transform[1]);
                 points_for_vtu.push_back(point_transform[2]);
+                
+                //points_for_vtu.push_back(pt.get<0>());
+                //points_for_vtu.push_back(pt.get<1>());
+                //points_for_vtu.push_back(0);
 
                 connectivity.push_back(node_count);
                 node_count++;

@@ -2,6 +2,16 @@
 
 BasisTransformation::BasisTransformation(const Eigen::Vector3d &twoD_plane_normal, const Eigen::Vector3d &twoD_plane_origin)
 {
+
+    Eigen::Vector3d current_z(0, 0, 1);
+    Eigen::Vector3d new_z = twoD_plane_normal.normalized();
+    Eigen::Vector3d axis_rot = current_z.cross(new_z);
+    double dot = current_z.dot(new_z);
+    double angle = std::acos(dot);
+
+    m_Transformation = Eigen::AngleAxisd(angle,axis_rot);
+
+    /*
     Eigen::Vector3d new_z = twoD_plane_normal.normalized();
 
     Eigen::Vector3d new_x(1, 0, 0);
@@ -79,6 +89,8 @@ BasisTransformation::BasisTransformation(const Eigen::Vector3d &twoD_plane_norma
     //m_Origin = Eigen::Vector3d(0, 0, 0);
 
     m_Transformation = m_BasisTo;// * m_BasisForm.inverse();
+    */
+
     m_Transformation_inv = m_Transformation.inverse(); //computeInverseAndDetWithCheck();
 }
 

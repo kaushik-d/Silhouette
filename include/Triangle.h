@@ -23,7 +23,7 @@ namespace STL
 
         void project(const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin = Eigen::Vector3d(0, 0, 0));
 
-        polygon_t toPolygon2D(const BasisTransformation& transformation) const;
+        polygon_t toPolygon2D(const BasisTransformation& transformation, double& z_save) const;
     };
 
 }

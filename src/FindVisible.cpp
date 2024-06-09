@@ -6,7 +6,7 @@ std::vector<STL::Triangle> FindVisible::get_visible_list(const std::vector<STL::
 {
     std::vector<STL::Triangle> visible_trianlges;
 
-    //Eigen::Vector3d light_direction = -shadow_plane_normal;
+    // Eigen::Vector3d light_direction = -shadow_plane_normal;
 
     for (auto &triangle : triangles)
     {
@@ -19,43 +19,44 @@ std::vector<STL::Triangle> FindVisible::get_visible_list(const std::vector<STL::
     return visible_trianlges;
 }
 
-mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles, const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
+mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
+                                   const Eigen::Vector3d &shadow_plane_normal,
+                                   const Eigen::Vector3d &shadow_plane_origin, double &z_save)
 {
 
     BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
 
-    auto& triangle = triangles[0];
+    auto &triangle = triangles[0];
     // triangle.project(shadow_plane_normal, shadow_plane_origin);
-    //polygon_t shadow1 = triangle.toPolygon2D(transformation);
+    // polygon_t shadow1 = triangle.toPolygon2D(transformation);
 
     mpolygon_t shadow;
-    //shadow.push_back(shadow1);
+    // shadow.push_back(shadow1);
 
     for (int i = 0; i < triangles.size(); i++)
     {
-        auto& triangle = triangles[i];
+        auto &triangle = triangles[i];
 
         mpolygon_t union_poly;
-        polygon_t tri_poly = triangle.toPolygon2D(transformation);
+        polygon_t tri_poly = triangle.toPolygon2D(transformation, z_save);
 
-
-        //if (bg::area(tri_poly) < 0.00001)
+        // if (bg::area(tri_poly) < 0.00001)
         //{
-        //    continue;
-        //}
+        //     continue;
+        // }
 
         bool check_covered = bg::covered_by(tri_poly, shadow);
 
-        if(check_covered)
+        if (check_covered)
         {
             continue;
         }
 
         boost::geometry::union_(tri_poly, shadow, union_poly);
-        
+
         std::cout << " tri_poly area = " << bg::area(tri_poly) << std::endl;
         std::cout << " shadow area = " << bg::area(shadow) << std::endl;
-        std::cout << " union_poly area = " << bg::area(union_poly) << std::endl;        
+        std::cout << " union_poly area = " << bg::area(union_poly) << std::endl;
 
         shadow = union_poly;
 
@@ -67,8 +68,8 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles, 
 
 void FindVisible::project_tringles(std::vector<STL::Triangle> &triangles, const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
 {
-    //auto triangle = triangles[0];
-    //triangle.project(shadow_plane_normal, shadow_plane_origin);
+    // auto triangle = triangles[0];
+    // triangle.project(shadow_plane_normal, shadow_plane_origin);
 
     for (auto &triangle : triangles)
     {
