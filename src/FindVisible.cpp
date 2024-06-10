@@ -58,9 +58,9 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
 
         boost::geometry::union_(tri_poly, shadow, union_poly);
 
-        std::cout << " tri_poly area = " << bg::area(tri_poly) << std::endl;
-        std::cout << " shadow area = " << bg::area(shadow) << std::endl;
-        std::cout << " union_poly area = " << bg::area(union_poly) << std::endl;
+        //std::cout << " tri_poly area = " << bg::area(tri_poly) << std::endl;
+        //std::cout << " shadow area = " << bg::area(shadow) << std::endl;
+        //std::cout << " union_poly area = " << bg::area(union_poly) << std::endl;
 
         shadow = union_poly;
 
