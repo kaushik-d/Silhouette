@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <thread>
 
 #include "FindVisible.h"
 #include "BasisTransformation.h"
@@ -28,44 +29,86 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
     const double small_area_purge_tol_rel = 0.01;
     const double small_area_purge_tol_abs = 0.001;
 
-    BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
+    constexpr unsigned int max_num_threads = 2;
+    unsigned int num_threads = std::thread::hardware_concurrency();
+    if (num_threads > max_num_threads)
+    {
+        num_threads = max_num_threads;
+    }
 
-    auto &triangle = triangles[0];
-    // triangle.project(shadow_plane_normal, shadow_plane_origin);
-    // polygon_t shadow1 = triangle.toPolygon2D(transformation);
+    if (triangles.size() < 100)
+    {
+        num_threads = 1;
+        std::cout << "Number of triangles is " << triangles.size() << ". Only one threads will be used. " << std::endl;
+    }
+    else
+    {
+        std::cout << "Number of triangles is " << triangles.size() << ". " << num_threads << " threads will be used. " << std::endl;
+    }
+
+    int elements_per_thread = triangles.size() / num_threads;
+    int remaining_elements = triangles.size() % num_threads;
 
     mpolygon_t shadow;
-    // shadow.push_back(shadow1);
 
-    for (int i = 0; i < triangles.size(); i++)
+    std::vector<std::thread> threads;
+    std::mutex g_mutex;
+
+    auto merge_trianlges = [&](int start, int end)
     {
-        auto &triangle = triangles[i];
+        mpolygon_t shadow_local;
+        BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
 
+        for (int i = start; i < end; i++)
+        {
+            auto &triangle = triangles[i];
+
+            mpolygon_t union_poly;
+            polygon_t tri_poly = triangle.toPolygon2D(transformation, z_save);
+
+            if (bg::area(tri_poly) < small_area_purge_tol_abs)
+            {
+                continue;
+            }
+
+            bool check_covered = bg::covered_by(tri_poly, shadow_local);
+
+            if (check_covered)
+            {
+                continue;
+            }
+
+            boost::geometry::union_(tri_poly, shadow_local, union_poly);
+
+            shadow_local = union_poly;
+
+            bg::correct(shadow_local);
+        }
+
+        g_mutex.lock();
         mpolygon_t union_poly;
-        polygon_t tri_poly = triangle.toPolygon2D(transformation, z_save);
-
-        if (bg::area(tri_poly) < small_area_purge_tol_abs)
-        {
-            continue;
-        }
-
-        bool check_covered = bg::covered_by(tri_poly, shadow);
-
-        if (check_covered)
-        {
-            continue;
-        }
-
-        boost::geometry::union_(tri_poly, shadow, union_poly);
-
-        //std::cout << " tri_poly area = " << bg::area(tri_poly) << std::endl;
-        //std::cout << " shadow area = " << bg::area(shadow) << std::endl;
-        //std::cout << " union_poly area = " << bg::area(union_poly) << std::endl;
-
+        boost::geometry::union_(shadow_local, shadow, union_poly);
         shadow = union_poly;
+        g_mutex.unlock();
+    };
 
-        bg::correct(shadow);
+    for (unsigned int i = 0; i < num_threads; ++i)
+    {
+        int start = i * elements_per_thread;
+        int end = start + elements_per_thread;
+        if (i == num_threads - 1)
+        {
+            end += remaining_elements;
+        }
+        threads.emplace_back(merge_trianlges, start, end);
     }
+
+    for (auto &thread : threads)
+    {
+        thread.join();
+    }
+
+    threads.clear();
 
     mpolygon_t shadow_correction;
 
@@ -84,11 +127,9 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
                 double area_inner = bg::area(inner_ring);
                 if (std::abs(area_inner) > small_area_purge_tol)
                 {
-                    //bg::append(poly_corrected.inners(), inner_ring);
                     poly_corrected.inners().push_back(inner_ring);
                 }
             }
-            //bg::append(shadow_correction, poly_corrected);
             shadow_correction.push_back(poly_corrected);
         }
     }

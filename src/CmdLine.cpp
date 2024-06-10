@@ -37,7 +37,7 @@ bool CmdLine::Initialize(int argc, char** argv) {
 				CmlLineError = true;
 			}
 
-			if (i != argc - 1 && argv[i + 1][0] != '--') {
+			if (i != argc - 1 && &argv[i + 1][0] != "--") {
 
 				const char* sVal = argv[i + 1];
 				m_opts.insert(std::make_pair(sOpt, sVal));

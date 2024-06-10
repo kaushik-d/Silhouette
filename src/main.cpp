@@ -5,9 +5,13 @@
 #include "FindVisible.h"
 #include "PolygonToVTK.h"
 #include "CmdLine.h"
+#include <Eigen/Core>
 
 int main(int argc, char *argv[])
 {
+    Eigen::initParallel();
+    Eigen::setNbThreads(1);
+
     std::filesystem::path file_name(argv[1]);
     Eigen::Vector3d shadow_plane_normal(0, 0, 1);
     Eigen::Vector3d shadow_plane_origin(0, 0, 0);
