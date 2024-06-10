@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cmath>
+
 #include "FindVisible.h"
 #include "BasisTransformation.h"
 
@@ -23,6 +25,8 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
                                    const Eigen::Vector3d &shadow_plane_normal,
                                    const Eigen::Vector3d &shadow_plane_origin, double &z_save)
 {
+    const double small_area_purge_tol_rel = 0.001;
+    const double small_area_purge_tol_abs = 0.0001;
 
     BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
 
@@ -40,10 +44,10 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
         mpolygon_t union_poly;
         polygon_t tri_poly = triangle.toPolygon2D(transformation, z_save);
 
-        // if (bg::area(tri_poly) < 0.00001)
-        //{
-        //     continue;
-        // }
+        if (bg::area(tri_poly) < small_area_purge_tol_abs)
+        {
+            continue;
+        }
 
         bool check_covered = bg::covered_by(tri_poly, shadow);
 
@@ -63,7 +67,33 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
         bg::correct(shadow);
     }
 
-    return shadow;
+    mpolygon_t shadow_correction;
+
+    double total_area = bg::area(shadow);
+    const double small_area_purge_tol = std::min(small_area_purge_tol_abs, small_area_purge_tol_rel * total_area);
+
+    for (polygon_t &poly : shadow)
+    {
+        if (bg::area(poly) > small_area_purge_tol)
+        {
+            polygon_t poly_corrected;
+            poly_corrected.outer() = poly.outer();
+
+            for (const auto &inner_ring : poly.inners())
+            {
+                double area_inner = bg::area(inner_ring);
+                if (std::abs(area_inner) > small_area_purge_tol)
+                {
+                    //bg::append(poly_corrected.inners(), inner_ring);
+                    poly_corrected.inners().push_back(inner_ring);
+                }
+            }
+            //bg::append(shadow_correction, poly_corrected);
+            shadow_correction.push_back(poly_corrected);
+        }
+    }
+
+    return shadow_correction;
 }
 
 void FindVisible::project_tringles(std::vector<STL::Triangle> &triangles, const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
