@@ -25,8 +25,8 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
                                    const Eigen::Vector3d &shadow_plane_normal,
                                    const Eigen::Vector3d &shadow_plane_origin, double &z_save)
 {
-    const double small_area_purge_tol_rel = 0.001;
-    const double small_area_purge_tol_abs = 0.0001;
+    const double small_area_purge_tol_rel = 0.01;
+    const double small_area_purge_tol_abs = 0.001;
 
     BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
 
