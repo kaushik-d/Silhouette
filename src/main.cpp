@@ -1,11 +1,13 @@
 #include <iostream>
 #include <filesystem>
+#include <Eigen/Core>
 
 #include "STLReader.h"
 #include "FindVisible.h"
 #include "PolygonToVTK.h"
 #include "CmdLine.h"
-#include <Eigen/Core>
+#include "Triangles.h"
+#include "Declustering.h"
 
 int main(int argc, char *argv[])
 {
@@ -45,7 +47,7 @@ int main(int argc, char *argv[])
 
     using Clock = std::chrono::high_resolution_clock;
 
-    // 1. Read in triangles. Each triangles has 3 vertex. There will be common vertex among triangles
+    // Read in triangles. Each triangles has 3 vertex. There will be common vertex among triangles
 
     double total_time(0);
     auto start = Clock::now();
@@ -63,9 +65,30 @@ int main(int argc, char *argv[])
     std::cout << "Checking normals takes " << duration.count() / 1e6 << " milliseconds." << std::endl;
     total_time += duration.count() / 1e6;
 
+    // convert list of individual striangles to a list of unique nodal points and vertex based an a tolerance
+    // Libraries like OpenMesh can do that.
+
     start = Clock::now();
 
-    auto visible_triangles = FindVisible::get_visible_list(triangle_list, shadow_plane_normal);
+    Triangles triangles;
+    double tolerance = 0.0001; // mm
+    triangles.convert_trianles_to_connectivity(triangle_list, tolerance, number_threads);
+
+    duration = Clock::now() - start;
+    std::cout << "Mergering duplicate nodes takes " << duration.count() / 1e6 << " milliseconds." << std::endl;
+    total_time += duration.count() / 1e6;
+
+    // get the outer shell of the solid
+
+    std::vector<STL::Triangle> outter_shell = Declustering::get_outter_shell(triangles);
+    STL::check_normals(outter_shell);
+
+    //
+    // Find tringles that are visible based on the normal of the shadow plane
+    //
+    start = Clock::now();
+
+    auto visible_triangles = FindVisible::get_visible_list(outter_shell, shadow_plane_normal);
 
     std::cout << "Among " << triangle_list.size() << " triangles " << visible_triangles.size() << " are visible." << std::endl;
 
