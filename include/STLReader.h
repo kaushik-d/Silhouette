@@ -6,7 +6,7 @@
 
 namespace STL
 {
-    std::vector<STL::Triangle> readBinary(const std::filesystem::path& filename);
+    std::vector<STL::Triangle> readBinary(const std::filesystem::path& filename, const BasisTransformation& transformation);
     void writeBinary(const std::filesystem::path& filename, const std::vector<STL::Triangle>& triangles);
 
     void check_normals(std::vector<STL::Triangle> &triangles);

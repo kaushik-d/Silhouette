@@ -57,11 +57,7 @@ polygon_t STL::Triangle::toPolygon2D(const BasisTransformation &transformation, 
         double area1 = bg::area(poly1);
 
         std::cout << "Area corrected " << area << " -> " << area1 << std::endl;
-
-        //bg::correct(poly1);
         return poly1;
     }
-
-    //bg::correct(poly);
     return poly;
 }

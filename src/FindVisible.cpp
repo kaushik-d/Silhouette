@@ -139,9 +139,6 @@ mpolygon_t FindVisible::get_shadow(const std::vector<STL::Triangle> &triangles,
 
 void FindVisible::project_tringles(std::vector<STL::Triangle> &triangles, const Eigen::Vector3d &shadow_plane_normal, const Eigen::Vector3d &shadow_plane_origin)
 {
-    // auto triangle = triangles[0];
-    // triangle.project(shadow_plane_normal, shadow_plane_origin);
-
     for (auto &triangle : triangles)
     {
         triangle.project(shadow_plane_normal, shadow_plane_origin);

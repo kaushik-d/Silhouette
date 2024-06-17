@@ -6,7 +6,7 @@
 
 #include "STLReader.h"
 
-std::vector<STL::Triangle> STL::readBinary(const std::filesystem::path &filename)
+std::vector<STL::Triangle> STL::readBinary(const std::filesystem::path &filename, const BasisTransformation& transformation)
 {
     std::vector<STL::Triangle> triangles;
     std::ifstream file(filename, std::ios::binary);
@@ -36,15 +36,19 @@ std::vector<STL::Triangle> STL::readBinary(const std::filesystem::path &filename
 
         file.read(reinterpret_cast<char *>(normal), 12);
         triangle.normal = {normal[0], normal[1], normal[2]};
+        triangle.normal = transformation.transform(triangle.normal);
 
         file.read(reinterpret_cast<char *>(vertex1), 12);
         triangle.vertex_list[0] = {vertex1[0], vertex1[1], vertex1[2]};
+        triangle.vertex_list[0] = transformation.transform(triangle.vertex_list[0]);
 
         file.read(reinterpret_cast<char *>(vertex2), 12);
         triangle.vertex_list[1] = {vertex2[0], vertex2[1], vertex2[2]};
+        triangle.vertex_list[1] = transformation.transform(triangle.vertex_list[1]);
 
         file.read(reinterpret_cast<char *>(vertex3), 12);
         triangle.vertex_list[2] = {vertex3[0], vertex3[1], vertex3[2]};
+        triangle.vertex_list[2] = transformation.transform(triangle.vertex_list[2]);
 
         file.read(reinterpret_cast<char *>(&attributeByteCount), 2);
 

@@ -52,6 +52,10 @@ int main(int argc, char *argv[])
     double total_time(0);
     auto start = Clock::now();
 
+    //
+    // Read in the triangles, and transform them such that z direction is the normal of the shadow plane 
+    //
+    BasisTransformation transformation(shadow_plane_normal, shadow_plane_origin);
     auto triangle_list = STL::readBinary(file_name);
 
     std::chrono::nanoseconds duration = Clock::now() - start;
